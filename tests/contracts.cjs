@@ -1,0 +1,2 @@
+const fs=require('fs'), assert=require('assert');
+const c=JSON.parse(fs.readFileSync('config.json'));assert.equal(c.prizes.length,2);assert.equal(new Set(c.prizes.map(x=>x.id)).size,2);for(const p of c.prizes)assert(fs.existsSync(p.image));assert(c.backendUrl.startsWith('https://script.google.com/'));const b=fs.readFileSync('backend/Code.js','utf8');for(const p of c.prizes)assert(b.includes("id:'"+p.id+"'"));assert(b.includes(c.spreadsheetId));console.log('Contratos de configuração e catálogo verificados.');

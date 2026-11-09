@@ -1,0 +1,17 @@
+{
+  "appName": "Sorteio de brindes | US Vale Verde",
+  "backendUrl": "https://script.google.com/macros/s/AKfycbwx1bi94YPPqBNMyP0nYTdYHJcNeZKfFSzY0qWQoWUJfn8Wd1962jXHvyZE-dWoKa9nZA/exec",
+  "spreadsheetId": "12kzc2a1VS7hLdK17wgk1yyHDNC-sI4Ta",
+  "prizes": [
+    {
+      "id": "trena",
+      "name": "Chaveiro trena Enaex",
+      "image": "assets/trena.png"
+    },
+    {
+      "id": "lanterna",
+      "name": "Lanterna chaveiro Enaex",
+      "image": "assets/lanterna.png"
+    }
+  ]
+}
