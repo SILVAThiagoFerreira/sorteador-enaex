@@ -9,6 +9,11 @@ function doPost(e) {
     if(q.user !== 'admin' || q.password !== 'admin') throw Error('Usuário ou senha incorretos.');
     const archive = readArchive_(), history = readHistory_(archive), last = history.length ? history[history.length-1].state : {active:false,delivered:0,items:CATALOG.map(x=>({...x,quantity:0}))};
     if(q.action==='verify' || q.action==='state') return json_({ok:true,state:last});
+    if(q.action==='clearHistory') {
+      const path=sheetPath_(archive);
+      if(path){const content=xml_(archive,path), header=content.match(/<row\b[^>]*\br="1"[^>]*>[\s\S]*?<\/row>/);if(!header)throw Error('Cabeçalho do histórico não encontrado.');const cleared=content.replace(/<sheetData\b[^>]*>[\s\S]*?<\/sheetData>/,'<sheetData>'+header[0]+'</sheetData>');if(cleared===content&&history.length)throw Error('Não foi possível limpar o histórico.');put_(archive,path,cleared)}
+      const state={...last,delivered:0};append_(archive,[],{type:'reinicio_historico',timestamp:new Date().toISOString(),state});return json_({ok:true,state});
+    }
     if(q.action==='configure') {
       if(!Array.isArray(q.items) || q.items.length!==CATALOG.length || new Set(q.items.map(x=>x.id)).size!==CATALOG.length) throw Error('Lista de brindes inválida.');
       const items=CATALOG.map(x=>{const found=q.items.find(y=>y.id===x.id);if(!found||!Number.isSafeInteger(found.quantity)||found.quantity<0||found.quantity>100000)throw Error('Quantidade inválida.');return {...x,quantity:found.quantity}});
