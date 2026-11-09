@@ -1,6 +1,6 @@
 # Sorteio de brindes | US Vale Verde
 
-Página estática que sorteia, entre Chaveirinho - Mini Trena (15%), Chaveirinho - Mini Lanterna (15%) e sem premiação (70%). Não requer login, estoque, Apps Script ou planilha. Cada clique realiza um sorteio independente no navegador; os resultados não são registrados.
+Página estática que sorteia, entre Chaveirinho - Mini Trena (25%), Chaveirinho - Mini Lanterna (25%) e sem premiação (50%). Não requer login, estoque, Apps Script ou planilha. Cada clique realiza um sorteio independente no navegador; os resultados não são registrados.
 
 A roleta gira por 12 segundos e respeita a preferência de movimento reduzido do dispositivo. O QR Code em `assets/qr-sorteador.png` aponta para a página publicada em https://silvathiagoferreira.github.io/sorteador-enaex/.
 

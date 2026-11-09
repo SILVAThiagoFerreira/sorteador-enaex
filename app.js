@@ -17,7 +17,7 @@ button.addEventListener('click',async()=>{
   if(spinning)return;
   spinning=true;button.disabled=true;button.firstChild.textContent='Girando... ';result.classList.remove('won');resultText.textContent='Boa sorte!';hint.textContent='A roleta está girando...';
   const roll=randomUnit();
-  const winner=roll<0.15?0:roll<0.30?1:2;
+  const winner=roll<0.25?0:roll<0.50?1:2;
   // Pick the result by its configured probability, then land inside its matching slice.
   const slice=winner===0?0:winner===1?2:(randomUnit()<0.5?1:3);
   const fraction=(slice+0.15+randomUnit()*0.7)/4;
