@@ -1,7 +1,6 @@
-# Tarefas
+# Verificação
 
-- Preparar layout responsivo, catálogo e roleta.
-- Implantar endpoint Apps Script e autorizar acesso ao Drive.
-- Verificar leitura e gravação usando cópia de teste antes de usar a base real.
-- Publicar a raiz no GitHub Pages e conferir visual e funcionamento.
-- `config.json` contém nome, backend, base e imagens; mudanças de catálogo devem ser replicadas na validação do backend.
+- Confirmar o giro completo e o resultado apontado.
+- Conferir a página em celular, tablet e telas grandes.
+- Decodificar o QR Code e verificar seu destino publicado.
+- Publicar a raiz no GitHub Pages e validar os arquivos públicos.

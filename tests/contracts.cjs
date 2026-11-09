@@ -1,2 +1,7 @@
-const fs=require('fs'), assert=require('assert');
-const c=JSON.parse(fs.readFileSync('config.json'));assert.equal(c.prizes.length,2);assert.equal(new Set(c.prizes.map(x=>x.id)).size,2);for(const p of c.prizes)assert(fs.existsSync(p.image));assert(c.backendUrl.startsWith('https://script.google.com/'));const b=fs.readFileSync('backend/Code.js','utf8');for(const p of c.prizes)assert(b.includes("id:'"+p.id+"'"));assert(b.includes(c.spreadsheetId));console.log('Contratos de configuração e catálogo verificados.');
+const fs=require('fs'),assert=require('assert');
+const html=fs.readFileSync('index.html','utf8'),js=fs.readFileSync('app.js','utf8');
+for(const path of ['assets/qr-sorteador.png','assets/logo.png','assets/trena.png','assets/lanterna.png'])assert(fs.existsSync(path),path);
+assert(html.includes('id="wheel"')&&html.includes('id="spin"'));
+assert(js.includes('8000')&&js.includes('crypto.getRandomValues'));
+assert(!/fetch\s*\(/.test(js));
+console.log('Contratos da página estática verificados.');

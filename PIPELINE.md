@@ -1,9 +1,8 @@
 # Fluxo
 
-1. Carregar configuração e autenticar no backend.
-2. Ler e validar histórico do XLSX.
-3. Validar e registrar estoque inicial ou ajuste.
-4. Serializar o sorteio com lock, selecionar uma unidade, acrescentar registro e atualizar o arquivo por ID.
-5. Confirmar resultado, animar a roleta e exibir quantidades.
+1. Abrir a página e clicar em Girar a roleta.
+2. Sortear um dos dois brindes no navegador.
+3. Animar a roleta até o setor selecionado e mostrar o resultado.
+4. Permitir um novo sorteio independente.
 
-Falhas são apresentadas e nenhuma confirmação é exibida antes da gravação. Confirme o histórico após qualquer interrupção de rede.
+O backend no diretório `backend/` pertence à versão anterior e não é utilizado pela página.

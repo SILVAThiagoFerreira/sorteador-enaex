@@ -1,28 +1,21 @@
-const $=s=>document.querySelector(s);let config,state,credentials,busy=false;const notice=message=>{const e=$('#notice');e.hidden=!message;e.textContent=message||''};const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));async function request(action,payload={}){if(!config.backendUrl)throw Error('A conexão com a planilha ainda não foi configurada. Consulte o responsável pelo sistema.');let response;try{response=await fetch(config.backendUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...credentials,...payload})})}catch{throw Error('Não foi possível conectar à base. Verifique a internet e tente novamente.')}if(!response.ok)throw Error('A base retornou um erro de conexão.');const data=await response.json();if(!data.ok)throw Error(data.error||'Não foi possível concluir a operação.');return data}function show(id){for(const x of ['login','setup','draw'])$('#'+x).hidden=x!==id;notice('')}function image(id){return config.prizes.find(p=>p.id===id)?.image||''}function renderSetup(){const items=state.items.length?state.items:config.prizes.map(p=>({...p,quantity:0}));$('#prizes').innerHTML=items.map(p=>`<div class="prize"><img src="${esc(image(p.id))}" alt=""><div><h3>${esc(p.name)}</h3><span class="muted">Brinde do evento</span><label>Quantidade disponível<input data-id="${esc(p.id)}" type="number" min="0" max="100000" step="1" value="${p.quantity}" required></label></div></div>`).join('');$('#prizes').oninput=updateTotal;updateTotal()}function updateTotal(){let n=[...document.querySelectorAll('#prizes input')].reduce((a,e)=>a+(+e.value||0),0);$('#setupTotal').textContent=`${n} ${n===1?'brinde disponível':'brindes disponíveis'}`;}function drawWheel(){
-  const canvas=$('#wheel'),ctx=canvas.getContext('2d'),items=state.items.filter(x=>x.quantity>0),total=items.reduce((a,x)=>a+x.quantity,0),cx=350,cy=350;
-  ctx.clearRect(0,0,700,700);
-  // A dark outer rim and fine highlights make the wheel read as a physical object.
-  ctx.beginPath();ctx.arc(cx,cy,342,0,Math.PI*2);ctx.fillStyle='#263943';ctx.fill();
-  ctx.beginPath();ctx.arc(cx,cy,326,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
-  if(!total){ctx.beginPath();ctx.arc(cx,cy,318,0,Math.PI*2);ctx.fillStyle='#e8edef';ctx.fill();return}
-  let start=-Math.PI/2;
-  items.forEach((x,i)=>{
-    const end=start+Math.PI*2*x.quantity/total,mid=(start+end)/2,span=end-start;
-    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,318,start,end);ctx.closePath();
-    ctx.fillStyle=i%2?'#344b58':'#e91d32';ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=4;ctx.stroke();
-    ctx.save();ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,310,start,end);ctx.closePath();ctx.clip();
-    ctx.beginPath();ctx.arc(cx,cy,285,start+.015,end-.015);ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=2;ctx.stroke();
-    if(span>.40){
-      const r=span<1?255:218,px=cx+Math.cos(mid)*r,py=cy+Math.sin(mid)*r;
-      ctx.translate(px,py);
-      ctx.fillStyle='rgba(255,255,255,.75)';ctx.font='700 14px Arial';ctx.textAlign='center';ctx.fillText('BRINDE',0,-19);
-      ctx.fillStyle='#fff';ctx.font='700 21px Arial';
-      const words=x.name.replace(/ Enaex$/i,'').split(' '), lines=[];let line='';
-      for(const word of words){const test=line?line+' '+word:word;if(ctx.measureText(test).width>170&&line){lines.push(line);line=word}else line=test}if(line)lines.push(line);
-      lines.slice(0,2).forEach((value,j)=>ctx.fillText(value,0,7+j*25));
-    }
-    ctx.restore();start=end;
-  });
-  for(let i=0;i<36;i++){const a=i*Math.PI/18;ctx.beginPath();ctx.arc(cx+Math.cos(a)*334,cy+Math.sin(a)*334,3.2,0,Math.PI*2);ctx.fillStyle=i%3===0?'#ffffff':'#9cacb3';ctx.fill()}
-  ctx.beginPath();ctx.arc(cx,cy,319,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=2;ctx.stroke();
-}function renderDraw(){let total=state.items.reduce((a,x)=>a+x.quantity,0);$('#stock').innerHTML=state.items.map(x=>`<div class="stock-item"><img src="${esc(image(x.id))}" alt=""><b>${esc(x.name)}</b><strong>${x.quantity}</strong></div>`).join('');$('#remaining').textContent=total;$('#delivered').textContent=state.delivered;$('#spin').disabled=busy||!total;$('#wheelHint').textContent=total?'Um brinde por vez. O estoque é atualizado a cada sorteio.':'Todos os brindes foram entregues.';drawWheel()}$('#loginForm').onsubmit=async e=>{e.preventDefault();credentials={user:e.target.user.value,password:e.target.password.value};try{const d=await request('state');state=d.state;if(state.active){show('draw');renderDraw()}else{show('setup');renderSetup()}}catch(err){notice(err.message)}};$('#start').onclick=async()=>{try{const inputs=[...document.querySelectorAll('#prizes input')];if(inputs.some(x=>!x.validity.valid))throw Error('Informe quantidades inteiras válidas.');let items=inputs.map(x=>({id:x.dataset.id,quantity:Number(x.value)}));if(!items.some(x=>x.quantity))throw Error('Informe pelo menos um brinde disponível.');state=(await request('configure',{items})).state;show('draw');renderDraw()}catch(e){notice(e.message)}};$('#clearHistory').onclick=async()=>{if(!confirm('Limpar o histórico de sorteios e zerar a contagem de entregues? As quantidades disponíveis serão mantidas.'))return;const button=$('#clearHistory');button.disabled=true;button.textContent='Limpando...';try{state=(await request('clearHistory')).state;renderSetup();notice('Histórico limpo. As quantidades disponíveis foram mantidas.')}catch(e){notice(e.message)}finally{button.disabled=false;button.textContent='Limpar histórico'}};$('#logout').onclick=()=>{credentials=null;$('#loginForm').reset();show('login')};$('#manage').onclick=()=>{$('#unlockPassword').value='';$('#passwordDialog').showModal()};$('#unlockForm').onsubmit=async e=>{if(e.submitter.value==='cancel')return;e.preventDefault();try{const manageButton=e.submitter;manageButton.disabled=true;manageButton.textContent='Aguarde...';try{state=(await request('state',{password:$('#unlockPassword').value})).state;$('#passwordDialog').close();show('setup');renderSetup()}finally{manageButton.disabled=false;manageButton.textContent='Continuar'}}catch(err){$('#passwordDialog').close();notice(err.message)}};$('#spin').onclick=async()=>{if(busy)return;busy=true;renderDraw();notice('');try{const before=state.items.filter(x=>x.quantity>0),total=before.reduce((a,x)=>a+x.quantity,0);const requestId=crypto.randomUUID();const d=await request('draw',{requestId});let start=0;for(const x of before){if(x.id===d.prize.id)break;start+=x.quantity}const fraction=(start+d.prize.offset)/total;const target=360-(fraction*360);const wheel=$('#wheel'),reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;const animation=wheel.animate([{transform:'rotate(0deg)'},{transform:`rotate(${360*4+target}deg)`}],{duration:reduced?100:3000,easing:'cubic-bezier(.16,.62,.18,1)',fill:'forwards'});await animation.finished;state=d.state;$('#result').classList.add('won');$('#result').innerHTML=`<span>BRINDE SORTEADO</span><p>${esc(d.prize.name)}</p>`;animation.cancel();renderDraw()}catch(e){notice(e.message)}finally{busy=false;renderDraw()}};async function init(){try{config=await (await fetch('config.json')).json();if(!config.backendUrl)notice('A conexão com a planilha ainda não foi configurada. O sorteio ficará disponível após a implantação da base.')}catch{notice('Não foi possível carregar a configuração do sistema.')}}init();
+'use strict';
+const wheel=document.querySelector('#wheel');
+const button=document.querySelector('#spin');
+const result=document.querySelector('#result');
+const resultText=document.querySelector('#resultText');
+const hint=document.querySelector('#hint');
+let currentAngle=0,spinning=false;
+function randomUnit(){const values=new Uint32Array(1);crypto.getRandomValues(values);return values[0]/4294967296}
+button.addEventListener('click',async()=>{
+  if(spinning)return;
+  spinning=true;button.disabled=true;button.firstChild.textContent='Girando... ';result.classList.remove('won');resultText.textContent='Boa sorte!';hint.textContent='A roleta está girando...';
+  const winner=randomUnit()<.5?0:1;
+  // The pointer is at the top. Pick an interior point in the chosen half.
+  const fraction=(winner+0.15+randomUnit()*0.7)/2;
+  const target=(360-fraction*360)%360;
+  const delta=(target-currentAngle+360)%360;
+  const destination=currentAngle+360*6+delta;
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const animation=wheel.animate([{transform:`rotate(${currentAngle}deg)`},{transform:`rotate(${destination}deg)`}],{duration:reduced?150:8000,easing:'cubic-bezier(.14,.55,.16,1)',fill:'forwards'});
+  try{await animation.finished;currentAngle=target;wheel.style.transform=`rotate(${currentAngle}deg)`;animation.cancel();resultText.textContent=winner===0?'Chaveiro trena Enaex':'Lanterna chaveiro Enaex';result.classList.add('won');hint.textContent='Clique para sortear novamente.'}catch{hint.textContent='Não foi possível concluir o giro. Tente novamente.'}finally{spinning=false;button.disabled=false;button.firstChild.textContent='Girar a roleta '}
+});

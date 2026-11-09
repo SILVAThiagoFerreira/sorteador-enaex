@@ -1,3 +1,3 @@
-# Dados
+# Esquema legado
 
-A aba `Sorteios_IA` é acrescentada ao XLSX de origem. Colunas: Data UTC, Operação, Brinde, ID sorteio e Registro. Registro contém JSON codificado em Base64, com estado completo, horário, tipo e, para sorteios, identificador e brinde. O estoque é o último estado registrado; registros anteriores são mantidos para auditoria.
+A versão atual é estática e não utiliza uma base de dados. A aba `Sorteios_IA` e o backend `backend/` pertencem à versão anterior; os registros existentes não foram modificados pela mudança da interface.
